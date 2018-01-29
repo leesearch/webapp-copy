@@ -119,7 +119,7 @@ def _gen_sql(table_name,mappings):
     sql.append(');')
     return '/n'.join(sql)
 
-class ModelMateclass(type):
+class ModelMateclass(type)
     '''
     Metaclass for model class
     '''
