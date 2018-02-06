@@ -217,4 +217,86 @@ _RESPONSE_HEADERS=(
     'Proxy Authenticate',
     'Refresh',
     'Retry-After',
+    'Server',
+    'Set-Cookie',
+    'Strict-Transport-Security',
+    'Trailer',
+    'Transfer-Encoding',
+    'Vary',
+    'Via',
+    'Warning',
+    'WWW-Authenticate',
+    'X-Frame-Options',
+    'X-XSS-Protection',
+    'X-Content-Type-Options',
+    'X-Forwarded-Proto',
+    'X-Powered-By',
+    'X-UA-Compatible'
 )
+
+_RESPONSE_HEADER_DICT=dict(zip(map(lambda x: x.upper(),_RESPONSE_HEADERS),_RESPONSE_HEADERS))
+
+_HEADER_X_POWERED_BY=('X-Powered-By','transwarp/1.0')
+
+class HttpError(Exception):
+    '''
+    HttpError that defines http error code:
+
+    >>>e.HttpErrot(404)
+    >>>e.status
+    '404 not found'
+    '''
+    def __init__(self,code):
+        '''
+        Init an HttpError with response code.
+        '''
+        super(HttpError,self).__init__()
+        self.status='%d %s' % (code,_RESPONSE_STATUS(code))
+
+    def header(self,name,value):
+        if not hasattr(self,'_headers'):
+            self._headers=[_HEADER_X_POWERED_BY]
+        self._headers.append((name,value))
+
+    @property
+    def headers(self):
+        if hasattr(self,'_headers'):
+            return self._headers
+        return []
+
+    def __str__(self):
+        return self.status
+
+    __repr__=__str__
+
+class RedirectError(HttpError):
+    '''
+    RedirectError that defines http redirect code.
+
+    >>>e.RedirectError(301,'http://www.apple.com')
+    >>>e.status
+    '302 not found'
+    >>>e.location
+    'http://www.apple.com'
+    '''
+    def __init__(self,code,location):
+        '''
+        Init an HttpError with response code.
+        '''
+        super(RedirectError,self).__init__(code)
+        self.location=location
+
+    def __str__(self):
+        return '%s %s' % (self.status,self.location)
+
+    __repr__=__str__
+
+def badrequest():
+    '''
+    Send a bad request response.
+
+    >>>raise badreqiest()
+    Traceback (most recent call last):
+      ...
+    HttpError: 400 Bad Request
+    '''
