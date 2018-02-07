@@ -300,3 +300,164 @@ def badrequest():
       ...
     HttpError: 400 Bad Request
     '''
+    return HttpError(400)
+
+def unauthorized():
+    '''
+    Send an authorized response.
+
+    >>>raise authorized()
+    Traceback (most recent call last):
+      ...
+    HttpError: 401 Bad Request
+    '''
+    return HttpError(401)
+
+def fobidden():
+    '''
+    Send a fobidden response.
+
+    >>>raise fobidden()
+    Traceback (most recent call last):
+      ...
+    HttpError: 403 Bad Request
+    '''
+    return HttpError(403)
+
+def notfound():
+    '''
+    Send a notfound response.
+
+    >>>raise notfound()
+    Traceback (most recent call last):
+      ...
+    HttpError: 404 Bad Request
+    '''
+    return HttpError(404)
+
+def conflict():
+    '''
+    Send a conflict response.
+
+    >>>raise conflict()
+    Traceback (most recent call last):
+      ...
+    HttpError: 409 Bad Request
+    '''
+    return HttpError(409)
+
+def internalerror():
+    '''
+    Send an internalerror.
+
+    >>>raise internalerror()
+    Traceback (most recent call last):
+      ...
+    HttpError: 500 Bad Request
+    '''
+    return HttpError(500)
+
+def redirect(location):
+    '''
+    Do permanent redirect.
+
+    >>>raise redirect('http://www.itranswarp.com')
+    Traceback (most recent call last):
+      ...
+    RedirectError: 301 Moved Permanently, http://www.itranswarp.com/
+    '''
+    return RedirectError(301,location)
+
+def foune(location):
+    '''
+    Do temporary redirect.
+
+    >>>raise found('http://www.itranswarp.com')
+    Traceback (most recent call last):
+      ...
+    RedirectError: 302 Found, http://www.itranswarp.com/
+    '''
+    return RedirectError(302,location)
+
+def seeother(location):
+    '''
+    Do temporary redirect.
+
+    >>>raise seeother('http://www.itranswarp.com')
+    Traceback (most recent call last):
+      ...
+    RedirectError: 303 See Other, http://www.itranswarp.com/
+    >>>e=seeother('http://www.itranswarp.com/seeother?r=123')
+    >>>e.location
+    'http://www.itranswarp.com/seeother?r=123'
+    '''
+    return RedirectError(303,location)
+
+def _to_str(s):
+    '''
+    Convert to str:
+
+    >>>_to_str('t123')=='t123'
+    True
+    >>>_to_str(u'\u4e2d\u6587')=='\xe4\xb8\xad\xe6\x96\x87'
+    True
+    >>>_to_str(-123)=='-123'
+    True
+    '''
+    if isinstance(s,str):
+        return s
+    if isinstance(s,unicode):
+        return s.encode('utf-8')
+    return str(s)
+
+def _to_unicode(s,encoding='utf-8'):
+    '''
+    Convert to unicode:
+
+    >>>_to_unicode('\xe4\xb8\xad\xe6\x96\x87')==u'\u4e2d\u6587'
+    True
+    '''
+    return s.decode('utf-8')
+
+def _quote(s,encoding='utf-8'):
+    '''
+    Url quote as str:
+
+    >>>_quote('http://example/test?a=1+')
+    'http%3A//example/test%3Fa%3D1%2B'
+    >>>_quote(u'Hello World!')
+    'Hello%20World%21'
+    '''
+    if isinstance(s,unicode):
+        s=s.encode(encoding)
+    return urllib.quote(s)
+
+def _unquote(s,encoding='utf-8'):
+    '''
+    Url unquote as unicode:
+
+    >>>_unquote('http%3A//example/test%3Fa%3D1+')
+    u'http://example/test?a=1+'
+     '''
+    return urllib.unquote(s).decode(encoding)
+
+def get(path):
+    '''
+    A @get decorator
+
+    @get('/:id')
+    def index(id):
+        pass
+
+    >>>@get('/test/:id')
+    ...def test():
+    ...     return 'ok'
+    ...
+    >>>test.__web_route__
+    '/test/:id'
+    >>>test.__web_method__
+    'GET'
+    >>>test()
+    'ok'
+    '''
+
