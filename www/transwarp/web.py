@@ -460,4 +460,100 @@ def get(path):
     >>>test()
     'ok'
     '''
+    def _decorator(func):
+        func.__web_route__=path
+        func.__web_method__='GET'
+        return func
+    return _decorator
+
+def post(path):
+    '''
+    A @post decorator:
+
+    >>>post('/post/:id')
+    ...def testpost():
+    ...    return '200'
+    ...
+    >>>testpost.__web_route__
+    '/post/:id'
+    >>>testpost..__web_method__
+    'POAT'
+    >>>testpost()
+    '200'
+    ...
+     '''
+    def _decorator(func):
+        func.__web_route__=path
+        func.__web_method__='POST'
+        return func
+    return _decorator
+
+_re_route=re.compile(r'(\:[a-zA-Z_]\w*)')
+
+def _build_regex(path):
+    '''
+    Convert route path to regex:
+
+    >>>_build_regex('/path/to/:file')
+    '^\\/path\\/to\\/(?P<file>[^\\/]+)$'
+    >>>_build_regex('/:user/:comments/list')
+    '^\\/(?P<user>[^\\/]+)\\/(?P<comments>[^\\/]+)\\/list$'
+    >>>_build_regex(':id-:pid/:w')
+    '^(?P<id>[^\\/]+)\\-(?P<pid>[^\\/]+)\\/(?P<w>[^\\/]+)$'
+    '''
+    re_list=['^']
+    var_list=[]
+    is_var=False
+    for v in _re_route.split(path):
+        if is_var:
+            var_name=v[1:]
+            var_list.append(var_name)
+            re_list.append(r'(?P<%s>[^\/]+)' % var_name)
+        else:
+            s=''
+            for ch in v:
+                if ch>='0' and ch<='9':
+                    s=s+ch
+                elif ch>='A' and ch<='Z':
+                    s=s+ch
+                elif ch>='a' and ch<='z':
+                    s=s+ch
+                else:
+                    s=s+'\\'+ch
+            re_list.append(s)
+        is_var=not is_var
+    re_list.append('$')
+    return ''.join(re_list)
+
+class Route(object):
+    '''
+    A Route object is a callable object
+    '''
+
+    def __init__(self,func):
+        self.path=func.__web_route__
+        self.method=func.__web_method__
+        self.is_static=_re_route.search(self.path) is None
+        if not self.is_static:
+            self.route=re.compile(_build_regex(self.path))
+        self.func=func
+
+    def match(self,url):
+        m=self.route.match(url)
+        if m:
+            return m.groups()
+        return None
+
+    def __call__(self,*args):
+        return self.func(*args)
+
+    def __str__(self):
+        if self.is_static:
+            return 'Route(static,%s,path=%s)' % (self.method,self.path)
+        return 'Route(dynamic,%s,path=%s)' % (self.method,self.path)
+
+    __repr__=__str__
+
+
+
 
