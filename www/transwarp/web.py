@@ -470,12 +470,17 @@ def post(path):
     '''
     A @post decorator:
 
+<<<<<<< HEAD
     >>>@post('/post/:id')
+=======
+    >>>post('/post/:id')
+>>>>>>> origin/master
     ...def testpost():
     ...    return '200'
     ...
     >>>testpost.__web_route__
     '/post/:id'
+<<<<<<< HEAD
     >>>testpost__web_method__
     'POST'
     >>>testpost()
@@ -484,6 +489,17 @@ def post(path):
     def _decorator(func):
         func.__web_route__=path
         func.__web_method='POST'
+=======
+    >>>testpost..__web_method__
+    'POAT'
+    >>>testpost()
+    '200'
+    ...
+     '''
+    def _decorator(func):
+        func.__web_route__=path
+        func.__web_method__='POST'
+>>>>>>> origin/master
         return func
     return _decorator
 
@@ -523,4 +539,182 @@ def _build_regex(path):
         is_var=not is_var
     re_list.append('$')
     return ''.join(re_list)
+<<<<<<< HEAD
+=======
+
+class Route(object):
+    '''
+    A Route object is a callable object
+    '''
+    def __init__(self,func):
+        self.path=func.__web_route__
+        self.method=func.__web_method__
+        self.is_static=_re_route.search(self.path) is None
+        if not self.is_static:
+            self.route=re.compile(_build_regex(self.path))
+        self.func=func
+
+    def match(self,url):
+        m=self.route.match(url)
+        if m:
+            return m.groups()
+        return None
+
+    def __call__(self,*args):
+        return self.func(*args)
+
+    def __str__(self):
+        if self.is_static:
+            return 'Route(static,%s,path=%s)' % (self.method,self.path)
+        return 'Route(dynamic,%s,path=%s)' % (self.method,self.path)
+
+    __repr__=__str__
+
+def _static_file_generator(fpath):
+    BLOCK_SIZE=8192
+    with open(fpath,'rb') as f:
+        block=f.read(BLOCK_SIZE)
+        while block:
+            yield block
+            block=f.read(BLOCK_SIZE)
+
+class StaticFileRoute(object):
+
+    def __init__(self):
+        self.method='GET'
+        self.is_static=False
+        self.route=re.compile('^/static/(.+)$')
+
+    def match(self,url):
+        if url.startswith('/static/'):
+            return (url[1:], )
+        return None
+
+    def __call__(self,*args):
+        fpath=os.path.join(ctx.application.document_root,args[0])
+        if not os.path.isfile(fpath):
+            raise notfound()
+        fext=os.path.splitext(fpath)[1]
+        ctx.response.content_type=mimetypes.types_map.get(fext.lower(),'application/octet-stream')
+        return _static_file_generator(fpath)
+
+def favicon_handler():
+    return _static_file_handler('/favicon.ico')
+
+class MultipartFile(object):
+    '''
+    Multipart file storage get from request input:
+
+    f=ctx.request['file']
+    f.filename # 'test.png'
+    f.file # file-like objecte
+    '''
+    def __init__(self,storage):
+        self.filename=_to_unicode(storage.filename)
+        self.file=storage.file
+
+class Request(object):
+    '''
+    Request object for obtaining all http request information:
+    '''
+    def __init__(self,environ):
+        self._environ=environ
+
+    def _parse_input(self):
+        def _convert(item):
+            if isinstance(item,list):
+                return [_to_unicode(i.value) for i in item]
+            if item.filename:
+                return MultipartFile(item)
+            return _to_unicode(item.value)
+        fs=cgi.FieldStorage(fp=self._environ['wsgi.input'],environ=self._environ,keep_blank_values=True)
+        inputs=dict()
+        for key in fs:
+            inputs[key]=_convert(fs[key])
+        return inputs
+
+    def _get_raw_input(self):
+        '''
+        Get raw input as dict containing values as unicode,list or MultipartFile:
+        '''
+        if not hasattr(self,'_raw_input'):
+            self._raw_input=self._parse_input()
+        return self._raw_input
+
+    def __getitem__(self,key):
+        '''
+        Get input parameter value.If the specified key has multiple value,the first one is returned.
+        If the specified key is not exist,then raise KeyError.
+
+        >>>from StringIO import StringIO
+        >>>r=Request({'REQUEST_METHOD':'POST','wsgi.input':StringIO('a=1&b=M%20M&c=ABC&c=XYZ&e=')})
+        >>>r['a']
+        u'1'
+        >>>r['c']
+        u'ABC'
+        >>>r['empty']
+        Traceback (most recent call last):
+            ...
+        KeyError: 'empty'
+        >>>b='----WebKitFormBoundaryQQ3J8kPsjFpTmqNz'
+        >>>pl=['--%s' % b, 'Content-Disposition: form-data; name=\\"name\\"\\n', 'Scofield', '--%s' % b, 'Content-Disposition: form-data; name=\\"name\\"\\n', 'Lincoln', '--%s' % b, 'Content-Disposition: form-data; name=\\"file\\"; filename=\\"test.txt\\"', 'Content-Type: text/plain\\n', 'just a test', '--%s' % b, 'Content-Disposition: form-data; name=\\"id\\"\\n', '4008009001', '--%s--' % b, '']
+        >>>payload= '\\n'.join(pl)
+        >>>r=Request({'REQUEST_METHOD':'POST','CONTENT_LENGTH':str(len(payload)),'CONTENT_TYPE':'multipart/form-data; boundary=%s' % b,'wsgi.input':StringIO(payload)})
+        >>>r.get('name')
+        u'Scofield'
+        >>>r.gets('name')
+        [u'Scofield',u'Lincoln']
+        >>>f=r.get('file')
+        >>>f.filename
+        u'test.txt'
+        >>>f.file.read()
+        'just a test'
+        '''
+        r=self._get_raw_input()[key]
+        if isinstance(r,list):
+            return r[0]
+        return r
+
+    def get(self,key,default=None):
+        '''
+        The same as request[key],but return default if key is not found.
+
+        >>>from StringIO import StringIO
+        >>>r=Request({'REQUEST_METHOD':'POST','wsgi.input':StringIO('a=1&b=M%20M&c=ABC&c=XYZ&e=')})
+        >>>r.get('a')
+        u'1'
+        >>>r.get('empty')
+        >>>r.get('empty','DEFAULT')
+        'DEFAULT'
+          '''
+        r=self._get_raw_input().get(key,default)
+        if isinstance(r,list):
+            return r[0]
+        return r
+
+    def gets(self,key):
+        '''
+        Get multiple values for specified key:
+
+        >>>from StringIO import StringIO
+        >>>r=Request({'REQUEST_METHOD':'POST','wsgi.input':StringIO('a=1&b=M%20M&c=ABC&c=XYZ&e=')})
+        >>>r.gets('a')
+        [u'1']
+        >>>r.gets('c')
+        [u'ABC',u'XYZ']
+        >>>r.gets('empty')
+        Traceback (most recent call last):
+            ...
+        KeyError: 'empty'
+        '''
+        r=self._get_raw_input()[key]
+        if isinstance(r,list):
+            return r[:]
+        return [r]
+
+
+
+
+
+>>>>>>> origin/master
 
