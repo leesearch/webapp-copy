@@ -5,7 +5,7 @@
 A simple, lightweight, WSGI-compatible web framework.
 '''
 
-__author__ = 'Michael Liao'
+__author__ = 'Search Lee'
 
 import types, os, re, cgi, sys, time, datetime, functools, mimetypes, threading, logging, urllib, traceback
 
