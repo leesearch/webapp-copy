@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    {% block meta %}<!-- block meta -->{% endmeta %}
+    <title>{% block title %} ? {% endblock %} - Awesome Python Webapp</title>
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="/static/css/uikit.min.css">
+    <link rel="stylesheet" href="/static/css/uikit.gradient.min.css">
+    <link rel="stylesheet" href="static/css/awesome.css" />
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/md5.js"></script>
+    <script src="/static/js/uikit.min.js"></script>
+    <script src="/static/js/stiky.min.js"></script>
+    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/awesome.js"></script>
+    {% block beforehead %}<!-- block head -->{% endblock %}
+</head>
+<body>
+    <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
+        <div class="uk-container uk-container-center">
+            <a href="/" class="uk-navbar-brand"></a>
+            <ul class="uk-navbar-nav">
+                <li data-url="blogs"><a href="/"><i class="uk-icon-home"></i>日志</a></li>
+                <li><a target="_blank" href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000"><i class="uk-icon-home"></i>教程</a></li>
+                <li><a target="_blank" href="https://github.com/michaelliao/awesome-python-webapp"><i class="uk-icon-code"></i>源码</a></li>
+            </ul>
+        <div class="uk-navbar-flip">
+            <ul class="uk-navbar-nav">
+</html>
