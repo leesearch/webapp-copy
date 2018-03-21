@@ -5,10 +5,12 @@
 {% block beforehead %}
 
 <script>
+
 function ValidateEmail(email){
     var re=/^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9/-/_]+){1,4}$/;
     return re.test(email.toLowercase())
 }
+
 $(function() {
     var vm = new Vue({
         el: 'form-register',
@@ -51,6 +53,7 @@ $(function() {
         }
     });
 });
+
 </script>
 
 {% endblock %}
