@@ -5,7 +5,7 @@
 {% block beforehead %}
 
 <script>
-function ValidateEmail(email){
+function validateEmail(email){
     var re=/^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9/-/_]+){1,4}$/;
     return re.test(email.toLowercase())
 }
@@ -34,10 +34,10 @@ $(function() {
                     return showError('两次输入的口令不一致');
                 }
                 startLoading();
-                pastApi('/api/users', {
+                postApi('/api/users', {
                     name: this.name,
                     email: this.email.trim().toLowerCase(),
-                    password: CryptpJS.MD5(this.password1).toString(),
+                    password: CryptoJS.MD5(this.password1).toString(),
                 }, function (err, r) {
                     if (err) {
                         showError(err)
