@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8" />
-    {% block meta %}<!-- block meta -->{% endmeta %}
+    {% block meta %}<!-- block meta  -->{% endblock %}
     <title>{% block title %} ? {% endblock %} - Awesome Python Webapp</title>
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -17,7 +17,7 @@
     <script src="/static/js/stiky.min.js"></script>
     <script src="/static/js/vue.min.js"></script>
     <script src="/static/js/awesome.js"></script>
-    {% block beforehead %}<!-- block head -->{% endblock %}
+    {% block beforehead %}<!-- before head  -->{% endblock %}
 </head>
 <body>
     <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
