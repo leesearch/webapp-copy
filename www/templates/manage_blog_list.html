@@ -1,0 +1,73 @@
+{% extends '__base__.html' %}
+
+{% block title %}日志{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+function initVM(data){
+    $('#div-blogs').show();
+    var vm=new Vue({
+        el:'#div-blogs',
+        data:{
+            blogs:data.blogs,
+            page:data.page
+        },
+        methods:{
+            previous:function () {
+                gotoPage(this.page.page_index - 1);
+            },
+            next:function () {
+                gotoPage(this.page.page_index + 1);
+            },
+            edit_blog:function (blog) {
+                location.assign('/manage/blogs/edit'+blog.id);
+            },
+            delete_blog:function (blog) {
+                showConfirm('确认删除？','确认要删除“'+ blog.name+'”？删除后不可恢复！',function (){
+                    postApi('/api/blog'+ blog.id +'/delete',{},function(err,r){
+                        if(err){
+                            return showError(err);
+                        }
+                        location.reload(r);
+                    });
+                });
+            }
+        }
+    });
+}
+
+$(function(){
+    getApi('/get/blogs?page={{ page_index }}',function(err,results){
+        if(err){
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1 uk-margin-bottom">
+        <div class="uk-panel uk-panel-box">
+            <ul class="uk-breadcrumb">
+                <li><a href="/manage/comments">评论</a></li>
+                <li class="uk-active"><span>日志</span></li>
+                <li><a href="/manage/users">用户</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="uk-width-1-1 uk-margin-bottom">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    </div>
+
+    <div id="div-blogs" class="uk-width-1-1" style="display:none">
+        <a href="/manage/blogs/create" class="uk-button uk-button-primary"><i class="uk-icon-plus"></i>新用户</a>
+    </div>
