@@ -1,0 +1,39 @@
+{% extends '__base__.html' %}
+
+{% block title %}编辑日志{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+var
+    action='{{ action }}';
+    redirect='{{ redirect }}';
+
+function initVue(blog){
+    var vm=new Vue({
+        el:'#form blog',
+        data:blog,
+        methods:{
+            submit:function(event){
+                event.preventDefault();
+                startLoading();
+                postApi(action,this.$data,function(err,r){
+                    if(err){
+                        showError(err);
+                    }
+                    else{
+                        return location.assign(redirect);
+                    }
+                    stopLoading();
+                });
+            },
+            cancle:function(){
+                return location.assign(redirect);
+            }
+        }
+    });
+}
+
+// {% if id %}
+</script>
